@@ -23,7 +23,7 @@ function getBreadcrumbs(currentFolderId: string, files: FileItem[]): FileItem[] 
     if (!currentItem) break
 
     crumbs.unshift(currentItem)
-    currentId = currentItem.parent || null
+    currentId = currentItem.parent ?? null
   }
 
   return crumbs
