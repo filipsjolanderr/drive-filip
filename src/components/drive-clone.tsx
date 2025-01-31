@@ -14,23 +14,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { Folder, File, Upload } from "lucide-react"
 import { DarkModeToggle } from "./dark-mode-toggle"
 
+function getBreadcrumbs(currentFolderId: string, files: FileItem[]): FileItem[] {
+  const crumbs: FileItem[] = []
+  let currentId: string | null = currentFolderId
+
+  while (currentId) {
+    const currentItem = files.find((file) => file.id === currentId)
+    if (!currentItem) break
+
+    crumbs.unshift(currentItem)
+    currentId = currentItem.parent || null
+  }
+
+  return crumbs
+}
+
 export default function DriveClone() {
   const [currentFolder, setCurrentFolder] = useState<string>("root")
-  const [breadcrumbs, setBreadcrumbs] = useState<FileItem[]>([mockFiles[0]])
+  const breadcrumbs = getBreadcrumbs(currentFolder, mockFiles)
 
   const getCurrentFiles = () => {
     return mockFiles.filter((file) => file.parent === currentFolder)
   }
 
-  const handleFolderClick = (folder: FileItem) => {
-    setCurrentFolder(folder.id)
-    setBreadcrumbs([...breadcrumbs, folder])
+  const handleFolderClick = (folderId: string) => {
+    setCurrentFolder(folderId)
   }
 
-  const handleBreadcrumbClick = (index: number) => {
-    const newBreadcrumbs = breadcrumbs.slice(0, index + 1)
-    setBreadcrumbs(newBreadcrumbs)
-    setCurrentFolder(newBreadcrumbs[newBreadcrumbs.length - 1].id)
+  const handleBreadcrumbClick = (folderId: string) => {
+    setCurrentFolder(folderId)
   }
 
   const handleUpload = () => {
@@ -45,7 +57,12 @@ export default function DriveClone() {
             {breadcrumbs.map((item, index) => (
               <React.Fragment key={item.id}>
                 <BreadcrumbItem>
-                  <BreadcrumbLink onClick={() => handleBreadcrumbClick(index)}>{item.name}</BreadcrumbLink>
+                  <BreadcrumbLink
+                    onClick={() => handleBreadcrumbClick(item.id)}
+                    className={index === breadcrumbs.length - 1 ? "text-foreground" : "text-muted-foreground"}
+                  >
+                    {item.name}
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
               </React.Fragment>
@@ -56,9 +73,9 @@ export default function DriveClone() {
           <Button onClick={handleUpload}>
             <Upload className="mr-2 h-4 w-4" /> Upload
           </Button>
-          <DarkModeToggle></DarkModeToggle>
+          <DarkModeToggle />
         </div>
-        </div>
+      </div>
 
       <Table>
         <TableHeader>
@@ -74,16 +91,16 @@ export default function DriveClone() {
                 {file.type === "folder" ? (
                   <button
                     className="flex items-center text-blue-500 hover:underline"
-                    onClick={() => handleFolderClick(file)}
+                    onClick={() => handleFolderClick(file.id)}
                   >
                     <Folder className="mr-2 h-4 w-4" />
                     {file.name}
                   </button>
                 ) : (
-                  <a href={`#file-${file.id}`} className="flex items-center text-blue-500 hover:underline">
+                  <div className="flex items-center">
                     <File className="mr-2 h-4 w-4" />
                     {file.name}
-                  </a>
+                  </div>
                 )}
               </TableCell>
               <TableCell>{file.type}</TableCell>
