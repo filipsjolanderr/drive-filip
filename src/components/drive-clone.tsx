@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { mockFiles, mockFolders } from "../../mockData"
+import { Folder, mockFiles, mockFolders } from "../lib/mockData"
 import { Button } from "~/components/ui/button"
 import {
   Breadcrumb,
@@ -23,22 +23,17 @@ import { DarkModeToggle } from "./dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/file-row"
 
 // Common interface for both files and folders
-interface Item {
-  id: string
-  name: string
-  parent?: string | null
-}
 
-function getBreadcrumbs(currentFolderId: string, items: Item[]): Item[] {
-  const crumbs: Item[] = []
+function getBreadcrumbs(currentFolderId: string, folders: Folder[]): Folder[] {
+  const crumbs: Folder[] = []
   let currentId: string | null = currentFolderId
 
   while (currentId) {
-    const currentItem = items.find((item) => item.id === currentId)
-    if (!currentItem) break
+    const currentFolder = folders.find((folder) => folder.id === currentId)
+    if (!currentFolder) break
 
-    crumbs.unshift(currentItem)
-    currentId = currentItem.parent ?? null
+    crumbs.unshift(currentFolder)
+    currentId = currentFolder.parent ?? null
   }
 
   return crumbs
