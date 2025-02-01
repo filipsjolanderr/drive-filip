@@ -19,7 +19,7 @@ import { Upload } from "lucide-react"
 import { DarkModeToggle } from "./dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
-import Link from "next/link"
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 
 // Common interface for both files and folders
 
@@ -72,6 +72,12 @@ export default function DriveContent(props: {
         </Breadcrumb>
 
         <div className="flex items-center space-x-4">
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
           <Button>
             <Upload className="mr-2 h-4 w-4" /> Upload
           </Button>
