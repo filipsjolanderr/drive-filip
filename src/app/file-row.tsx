@@ -1,8 +1,9 @@
 import type { Folder, File } from "~/lib/mockData"
 import { TableRow, TableCell } from "~/components/ui/table"
 import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
+import { folders_table } from "~/server/db/schema";
 
-export function FileRow(props: { file: File }) {
+export function FileRow(props: { file: (typeof folders_table.$inferSelect) }) {
 
     const { file } = props
     return (
@@ -21,7 +22,7 @@ export function FileRow(props: { file: File }) {
     )
 }
 
-export function FolderRow(props: { folder: Folder, handleFolderClick: () => void }) {
+export function FolderRow(props: { folder: (typeof folders_table.$inferSelect), handleFolderClick: () => void }) {
     const { folder, handleFolderClick } = props
     return (
         <TableRow key={folder.id}>

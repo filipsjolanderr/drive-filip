@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState } from "react"
-import { Folder, mockFiles, mockFolders } from "../lib/mockData"
 import { Button } from "~/components/ui/button"
 import {
   Breadcrumb,
@@ -21,12 +20,13 @@ import {
 import { Upload } from "lucide-react"
 import { DarkModeToggle } from "./dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/file-row"
+import type { folders_table, files_table } from "~/server/db/schema"
 
 // Common interface for both files and folders
 
-function getBreadcrumbs(currentFolderId: string, folders: Folder[]): Folder[] {
-  const crumbs: Folder[] = []
-  let currentId: string | null = currentFolderId
+function getBreadcrumbs(currentFolderId: number, folders: typeof folders_table.$inferSelect[]): typeof folders_table.$inferSelect[] {
+  const crumbs: typeof folders_table.$inferSelect[] = []
+  let currentId: number | null = currentFolderId
 
   while (currentId) {
     const currentFolder = folders.find((folder) => folder.id === currentId)
@@ -39,25 +39,21 @@ function getBreadcrumbs(currentFolderId: string, folders: Folder[]): Folder[] {
   return crumbs
 }
 
-export default function DriveClone() {
-  const [currentFolder, setCurrentFolder] = useState<string>("root")
+export default function DriveContent(props: {
+  folders: typeof folders_table.$inferSelect[];
+  files: typeof files_table.$inferSelect[];
+}) {
+  const [currentFolder, setCurrentFolder] = useState<number>(1)
 
   // Use only folders for breadcrumbs
-  const breadcrumbs = getBreadcrumbs(currentFolder, mockFolders)
+  const breadcrumbs = getBreadcrumbs(currentFolder, props.folders)
 
-  const getCurrentFiles = () => {
-    return mockFiles.filter((file) => file.parent === currentFolder)
-  }
 
-  const getCurrentFolders = () => {
-    return mockFolders.filter((folder) => folder.parent === currentFolder)
-  }
-
-  const handleFolderClick = (folderId: string) => {
+  const handleFolderClick = (folderId: number) => {
     setCurrentFolder(folderId)
   }
 
-  const handleBreadcrumbClick = (folderId: string) => {
+  const handleBreadcrumbClick = (folderId: number) => {
     setCurrentFolder(folderId)
   }
 
@@ -105,14 +101,14 @@ export default function DriveClone() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {getCurrentFolders().map((folder) => (
+          {props.folders.map((folder) => (
             <FolderRow
               key={folder.id}
               folder={folder}
               handleFolderClick={() => handleFolderClick(folder.id)}
             />
           ))}
-          {getCurrentFiles().map((file) => (
+          {props.files.map((file) => (
             <FileRow key={file.id} file={file} />
           ))}
         </TableBody>

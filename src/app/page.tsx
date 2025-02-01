@@ -1,10 +1,15 @@
-import DriveClone from "~/components/drive-clone";
-import Link from "next/link";
 
-export default function HomePage() {
+import DriveContent from "~/components/drive-content";
+import { db } from "~/server/db";
+import { files_table, folders_table } from "~/server/db/schema";
+
+export default async function HomePage() {
+  const files = await db.select().from(files_table);
+  const folders = await db.select().from(folders_table);
+  
   return (
     <main className="min-h-screen bg-background">
-      <DriveClone />
+      <DriveContent files={files} folders={folders} />
     </main>
   );
 }
