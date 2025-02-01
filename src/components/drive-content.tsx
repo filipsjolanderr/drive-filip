@@ -1,6 +1,4 @@
-"use client"
-
-import React, { useState } from "react"
+import React from "react"
 import { Button } from "~/components/ui/button"
 import {
   Breadcrumb,
@@ -46,10 +44,6 @@ export default function DriveContent(props: {
   parents: typeof folders_table.$inferSelect[];
 }) {
 
-  function handleUpload(): void {
-    throw new Error("Function not implemented.")
-  }
-
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -77,7 +71,7 @@ export default function DriveContent(props: {
         </Breadcrumb>
 
         <div className="flex items-center space-x-4">
-          <Button onClick={handleUpload}>
+          <Button>
             <Upload className="mr-2 h-4 w-4" /> Upload
           </Button>
           <DarkModeToggle />
