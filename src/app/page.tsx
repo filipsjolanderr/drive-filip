@@ -9,7 +9,7 @@ export default async function HomePage() {
   
   return (
     <main className="min-h-screen bg-background">
-      <DriveContent files={files} folders={folders} />
+      <p>test</p>
     </main>
   );
 }

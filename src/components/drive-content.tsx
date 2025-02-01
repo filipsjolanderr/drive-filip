@@ -97,7 +97,7 @@ export default function DriveContent(props: {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[300px]">Name</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Size</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
