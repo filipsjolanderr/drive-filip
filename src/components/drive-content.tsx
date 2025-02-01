@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react"
 import { Button } from "~/components/ui/button"
 import {
@@ -20,6 +22,8 @@ import { DarkModeToggle } from "./dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
+import { UploadButton } from "./utils/uploadthing"
+import { useRouter } from "next/navigation"
 
 // Common interface for both files and folders
 
@@ -44,6 +48,8 @@ export default function DriveContent(props: {
   parents: typeof folders_table.$inferSelect[];
   currentFolderId: number;
 }) {
+
+  const navigate = useRouter();
 
   return (
     <div className="container mx-auto p-4">
@@ -78,9 +84,6 @@ export default function DriveContent(props: {
           <SignedIn>
             <UserButton />
           </SignedIn>
-          <Button>
-            <Upload className="mr-2 h-4 w-4" /> Upload
-          </Button>
           <DarkModeToggle />
         </div>
       </div>
@@ -103,6 +106,15 @@ export default function DriveContent(props: {
           ))}
         </TableBody>
       </Table>
+      <UploadButton
+        endpoint="driveUploader"
+        onClientUploadComplete={() => {
+          navigate.refresh();
+        }}
+        input={{
+          folderId: props.currentFolderId,
+        }}
+      />
     </div>
   )
 }
