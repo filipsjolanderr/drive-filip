@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { type FileItem, mockFiles } from "../../mockData"
+import { mockFiles, mockFolders } from "../../mockData"
 import { Button } from "~/components/ui/button"
 import {
   Breadcrumb,
@@ -10,16 +10,31 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table"
-import { Folder, File, Upload } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table"
+import { Upload } from "lucide-react"
 import { DarkModeToggle } from "./dark-mode-toggle"
+import { FileRow, FolderRow } from "~/app/file-row"
 
-function getBreadcrumbs(currentFolderId: string, files: FileItem[]): FileItem[] {
-  const crumbs: FileItem[] = []
+// Common interface for both files and folders
+interface Item {
+  id: string
+  name: string
+  parent?: string | null
+}
+
+function getBreadcrumbs(currentFolderId: string, items: Item[]): Item[] {
+  const crumbs: Item[] = []
   let currentId: string | null = currentFolderId
 
   while (currentId) {
-    const currentItem = files.find((file) => file.id === currentId)
+    const currentItem = items.find((item) => item.id === currentId)
     if (!currentItem) break
 
     crumbs.unshift(currentItem)
@@ -31,10 +46,16 @@ function getBreadcrumbs(currentFolderId: string, files: FileItem[]): FileItem[] 
 
 export default function DriveClone() {
   const [currentFolder, setCurrentFolder] = useState<string>("root")
-  const breadcrumbs = getBreadcrumbs(currentFolder, mockFiles)
+
+  // Use only folders for breadcrumbs
+  const breadcrumbs = getBreadcrumbs(currentFolder, mockFolders)
 
   const getCurrentFiles = () => {
     return mockFiles.filter((file) => file.parent === currentFolder)
+  }
+
+  const getCurrentFolders = () => {
+    return mockFolders.filter((folder) => folder.parent === currentFolder)
   }
 
   const handleFolderClick = (folderId: string) => {
@@ -59,7 +80,11 @@ export default function DriveClone() {
                 <BreadcrumbItem>
                   <BreadcrumbLink
                     onClick={() => handleBreadcrumbClick(item.id)}
-                    className={index === breadcrumbs.length - 1 ? "text-foreground" : "text-muted-foreground"}
+                    className={
+                      index === breadcrumbs.length - 1
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }
                   >
                     {item.name}
                   </BreadcrumbLink>
@@ -85,26 +110,15 @@ export default function DriveClone() {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {getCurrentFolders().map((folder) => (
+            <FolderRow
+              key={folder.id}
+              folder={folder}
+              handleFolderClick={() => handleFolderClick(folder.id)}
+            />
+          ))}
           {getCurrentFiles().map((file) => (
-            <TableRow key={file.id}>
-              <TableCell className="font-medium">
-                {file.type === "folder" ? (
-                  <button
-                    className="flex items-center text-blue-500 hover:underline"
-                    onClick={() => handleFolderClick(file.id)}
-                  >
-                    <Folder className="mr-2 h-4 w-4" />
-                    {file.name}
-                  </button>
-                ) : (
-                  <div className="flex items-center">
-                    <File className="mr-2 h-4 w-4" />
-                    {file.name}
-                  </div>
-                )}
-              </TableCell>
-              <TableCell>{file.type}</TableCell>
-            </TableRow>
+            <FileRow key={file.id} file={file} />
           ))}
         </TableBody>
       </Table>
