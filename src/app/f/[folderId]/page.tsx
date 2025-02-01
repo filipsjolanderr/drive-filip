@@ -1,4 +1,5 @@
-import DriveContent from "~/components/drive-content";
+import { z } from "zod";
+import DriveContent from "~/app/f/[folderId]/drive-content";
 import { QUERIES } from "~/server/db/queries";
 
 export default async function DrivePage(props: {
@@ -6,11 +7,15 @@ export default async function DrivePage(props: {
 }) {
     const params = await props.params;
 
-    const parsedFolderId = parseInt(params.folderId);
-    if (isNaN(parsedFolderId)) {
-        return <div>Invalid folder ID</div>;
-    }
+    const { data, success } = z
+        .object({
+            folderId: z.coerce.number(),
+        })
+        .safeParse(params);
 
+    if (!success) return <div>Invalid folder ID</div>;
+
+    const parsedFolderId = data.folderId;
     const [folders, files, parents] = await Promise.all([
         QUERIES.getFolders(parsedFolderId),
         QUERIES.getFiles(parsedFolderId),

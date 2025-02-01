@@ -18,11 +18,11 @@ import {
   TableRow,
 } from "~/components/ui/table"
 import { Upload } from "lucide-react"
-import { DarkModeToggle } from "./dark-mode-toggle"
-import { FileRow, FolderRow } from "~/app/file-row"
+import { DarkModeToggle } from "../../../components/dark-mode-toggle"
+import { FileRow, FolderRow } from "~/app/f/[folderId]/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
-import { UploadButton } from "./utils/uploadthing"
+import { UploadButton } from "../../../components/utils/uploadthing"
 import { useRouter } from "next/navigation"
 
 // Common interface for both files and folders
@@ -99,7 +99,7 @@ export default function DriveContent(props: {
           {props.folders.map((folder) => (
             <FolderRow
               key={folder.id}
-              folder={folder}            />
+              folder={folder} />
           ))}
           {props.files.map((file) => (
             <FileRow key={file.id} file={file} />
