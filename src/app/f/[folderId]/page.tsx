@@ -16,10 +16,11 @@ export default async function DrivePage(props: {
     }
     const files = await db.select().from(files_table).where(eq(files_table.parent, parsedFolderId));
     const folders = await db.select().from(folders_table).where(eq(folders_table.parent, parsedFolderId));
+    const parents = await db.select().from(folders_table).where(eq(folders_table.id, parsedFolderId));
 
     return (
         <main className="min-h-screen bg-background">
-            <DriveContent files={files} folders={folders} />
+            <DriveContent files={files} folders={folders} parents={parents}  />
         </main>
     );
 }

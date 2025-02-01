@@ -2,6 +2,7 @@ import type { Folder, File } from "~/lib/mockData"
 import { TableRow, TableCell } from "~/components/ui/table"
 import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
 import { files_table, folders_table } from "~/server/db/schema";
+import Link from "next/link";
 
 export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
 
@@ -21,18 +22,18 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
     )
 }
 
-export function FolderRow(props: { folder: (typeof folders_table.$inferSelect), handleFolderClick: () => void }) {
-    const { folder, handleFolderClick } = props
+export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }) {
+    const { folder } = props
     return (
         <TableRow key={folder.id}>
             <TableCell className="font-medium">
-                <button
+                <Link
                     className="flex items-center"
-                    onClick={() => handleFolderClick()}
+                    href={`/f/${folder.id}`}
                 >
                     <FolderIcon className="mr-2 h-4 w-4" />
                     {folder.name}
-                </button>
+                </Link>
             </TableCell>
             <TableCell>
             </TableCell>

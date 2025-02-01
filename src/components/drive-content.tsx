@@ -21,6 +21,7 @@ import { Upload } from "lucide-react"
 import { DarkModeToggle } from "./dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
+import Link from "next/link"
 
 // Common interface for both files and folders
 
@@ -42,49 +43,39 @@ function getBreadcrumbs(currentFolderId: number, folders: typeof folders_table.$
 export default function DriveContent(props: {
   folders: typeof folders_table.$inferSelect[];
   files: typeof files_table.$inferSelect[];
+  parents: typeof folders_table.$inferSelect[];
 }) {
-  const [currentFolder, setCurrentFolder] = useState<number>(1)
 
-  // Use only folders for breadcrumbs
-  const breadcrumbs = getBreadcrumbs(currentFolder, props.folders)
-
-
-  const handleFolderClick = (folderId: number) => {
-    setCurrentFolder(folderId)
-  }
-
-  const handleBreadcrumbClick = (folderId: number) => {
-    setCurrentFolder(folderId)
-  }
-
-  const handleUpload = () => {
-    alert("Upload functionality would be implemented here")
+  function handleUpload(): void {
+    throw new Error("Function not implemented.")
   }
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
+
         <Breadcrumb>
           <BreadcrumbList>
-            {breadcrumbs.map((item, index) => (
-              <React.Fragment key={item.id}>
+            {props.parents.map((folder, index) => (
+              <React.Fragment key={folder.id}>
                 <BreadcrumbItem>
                   <BreadcrumbLink
-                    onClick={() => handleBreadcrumbClick(item.id)}
+                    href={`/f/${folder.id}`}
                     className={
-                      index === breadcrumbs.length - 1
+                      index === props.parents.length - 1
                         ? "text-foreground"
                         : "text-muted-foreground"
                     }
                   >
-                    {item.name}
+                    {folder.name}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+                {index < props.parents.length - 1 && <BreadcrumbSeparator />}
               </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
+
         <div className="flex items-center space-x-4">
           <Button onClick={handleUpload}>
             <Upload className="mr-2 h-4 w-4" /> Upload
@@ -104,9 +95,7 @@ export default function DriveContent(props: {
           {props.folders.map((folder) => (
             <FolderRow
               key={folder.id}
-              folder={folder}
-              handleFolderClick={() => handleFolderClick(folder.id)}
-            />
+              folder={folder}            />
           ))}
           {props.files.map((file) => (
             <FileRow key={file.id} file={file} />
