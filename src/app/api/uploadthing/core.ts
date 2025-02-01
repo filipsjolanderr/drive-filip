@@ -36,6 +36,8 @@ export const ourFileRouter = {
 
             if (!folder) throw new UploadThingError("Folder not found");
 
+            if (folder.ownerId !== user.userId)
+                throw new UploadThingError("Unauthorized");
 
             // Whatever is returned here is accessible in onUploadComplete as `metadata`
             return { userId: user.userId, parentId: input.folderId };
