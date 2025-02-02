@@ -13,6 +13,7 @@ import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { toast } from "sonner";
+import formatFileSize from "~/lib/format-file-size";
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -51,23 +52,12 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
         setShowDeleteDialog(false);
     };
 
-    function formatFileSize(size: number) {
-        if (size < 1024) {
-            return size + " B";
-        } else if (size < 1024 * 1024) {
-            return (size / 1024).toFixed(2) + " KB";
-        } else if (size < 1024 * 1024 * 1024) {
-            return (size / 1024 / 1024).toFixed(2) + " MB";
-        } else {
-            return (size / 1024 / 1024 / 1024).toFixed(2) + " GB";
-        }
-    }
 
     return (
         <TableRow key={file.id}>
             <TableCell className="font-medium">
                 <a href={file.url} target="_blank">
-                    <div className="flex items-center text-blue-500 hover:underline">
+                    <div className="flex items-center hover:underline">
                         <FileIcon className="mr-2 h-4 w-4" />
                         {file.name}
                     </div>
@@ -121,10 +111,7 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
                             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
                                 Cancel
                             </Button>
-                            <Button variant="destructive" onClick={() => {
-                                deleteFile(file.key);
-                                setShowDeleteDialog(false);
-                            }}>
+                            <Button variant="destructive" onClick={handleDelete}>
                                 Delete
                             </Button>
                         </DialogFooter>

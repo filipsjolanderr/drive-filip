@@ -1,7 +1,11 @@
 import { z } from "zod";
 import DriveContent from "~/app/f/[folderId]/drive-content";
 import { QUERIES } from "~/server/db/queries";
-import { Navbar } from "./navbar";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { DriveSidebar } from "./sidebar";
+import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
+import { cookies } from "next/headers"
 
 export default async function DrivePage(props: {
     params: Promise<{ folderId: string }>
@@ -16,24 +20,37 @@ export default async function DrivePage(props: {
 
     if (!success) return <div>Invalid folder ID</div>;
 
+    const session = await auth();
+
+    if (!session.userId) return redirect("/sign-in");
+
+
     const parsedFolderId = data.folderId;
-    const [folders, files, parents] = await Promise.all([
+    const [folders, files, parents, storageUsed, storageTotal] = await Promise.all([
         QUERIES.getFolders(parsedFolderId),
         QUERIES.getFiles(parsedFolderId),
         QUERIES.getAllParentsForFolder(parsedFolderId),
+        QUERIES.getStorageUsed(session.userId),
+        2147483648
     ]);
+
+    const cookieStore = await cookies()
+    const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
 
     return (
         <>
-            <div className="container mx-auto p-4">
-                <Navbar />
-                <DriveContent
-                    files={files}
-                    folders={folders}
-                    parents={parents}
-                    currentFolderId={parsedFolderId}
-                />
-            </div>
+            <SidebarProvider defaultOpen={defaultOpen}>
+                <DriveSidebar currentFolderId={parsedFolderId} storageUsed={storageUsed} storageTotal={storageTotal} />
+
+                <div className="p-4 w-full">
+                    <DriveContent
+                        files={files}
+                        folders={folders}
+                        parents={parents}
+                        currentFolderId={parsedFolderId}
+                    />
+                </div>
+            </SidebarProvider>
         </>
     );
 }

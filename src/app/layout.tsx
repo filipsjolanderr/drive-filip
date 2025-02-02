@@ -39,7 +39,6 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <PostHogProvider>
-              
               {children}
               <Toaster />
             </PostHogProvider>

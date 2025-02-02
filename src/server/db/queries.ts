@@ -2,10 +2,10 @@ import "server-only";
 
 import { db } from "~/server/db";
 import {
-    files_table ,
+    files_table,
     folders_table,
 } from "~/server/db/schema";
-import { eq, isNull, and } from "drizzle-orm";
+import { eq, isNull, and, sum } from "drizzle-orm";
 
 export const QUERIES = {
     getFolders: function (folderId: number) {
@@ -55,6 +55,12 @@ export const QUERIES = {
                 and(eq(folders_table.ownerId, userId), isNull(folders_table.parent)),
             );
         return folder[0];
+    },
+
+    getStorageUsed: async function (userId: string) {
+        const storageUsed = await db.select({ size: sum(files_table.size) }).from(files_table).where( eq(files_table.ownerId, userId));
+        if (!storageUsed[0]) return 0;
+        return Number(storageUsed[0].size);
     },
 };
 
