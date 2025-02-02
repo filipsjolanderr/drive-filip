@@ -3,6 +3,8 @@ import { TableRow, TableCell } from "~/components/ui/table"
 import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
 import { files_table, folders_table } from "~/server/db/schema";
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { deleteFile } from "~/server/actions";
 
 export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
 
@@ -17,7 +19,14 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
                     </div>
                 </a>
             </TableCell>
+            <TableCell>file</TableCell>
             <TableCell>{file.size}</TableCell>
+            <TableCell className="text-right">
+                <Button variant="ghost" onClick={() => deleteFile(file.id)}>
+                    <Trash2Icon className="h-4 w-4" size={20} />
+                </Button>
+            </TableCell>
+
         </TableRow>
     )
 }
@@ -35,8 +44,9 @@ export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }
                     {folder.name}
                 </Link>
             </TableCell>
-            <TableCell>
-            </TableCell>
+            <TableCell />
+            <TableCell />
+            <TableCell />
 
         </TableRow>
     )
