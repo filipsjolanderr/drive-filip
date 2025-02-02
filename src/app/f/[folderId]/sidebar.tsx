@@ -26,10 +26,12 @@ import { z } from "zod";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { createFolder } from "~/server/actions";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+
+export const experimental_ppr = true
 
 // Menu items.
 const items = [
@@ -105,6 +107,7 @@ export function DriveSidebar(props: { currentFolderId: number, storageUsed: numb
                                 <DropdownMenuItem>
                                     <span>My Drive</span>
                                 </DropdownMenuItem>
+
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </SidebarMenuItem>
@@ -184,12 +187,14 @@ export function DriveSidebar(props: { currentFolderId: number, storageUsed: numb
             <SidebarSeparator />
             <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuItem className="flex items-center justify-start gap-3">
-                        <UserButton />
-                        <div className="flex-grow justify-start">
-                            <StorageProgress storageUsed={props.storageUsed} storageTotal={props.storageTotal} />
-                        </div>
-                    </SidebarMenuItem>
+                    <Suspense fallback={<div className="h-4 bg-muted rounded w-full" />}>
+                        <SidebarMenuItem className="flex items-center justify-start gap-3">
+                            <UserButton />
+                            <div className="flex-grow justify-start">
+                                <StorageProgress />
+                            </div>
+                        </SidebarMenuItem>
+                    </Suspense>
                 </SidebarMenu>
             </SidebarFooter>
 

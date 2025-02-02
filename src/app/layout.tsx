@@ -21,8 +21,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider >
-      <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
-        <body>
+      <html lang="en" className={`${GeistSans.variable} antialiased`} suppressHydrationWarning>
+        <body >
           <NextSSRPlugin
             /**
              * The `extractRouterConfig` will extract **only** the route configs

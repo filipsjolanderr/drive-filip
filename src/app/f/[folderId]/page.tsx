@@ -6,6 +6,10 @@ import { redirect } from "next/navigation";
 import { DriveSidebar } from "./sidebar";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
 import { cookies } from "next/headers"
+import { Suspense } from "react";
+import { DriveContentSkeleton } from "./drive-content-skeleton";
+
+export const experimental_ppr = true
 
 export default async function DrivePage(props: {
     params: Promise<{ folderId: string }>
@@ -38,19 +42,19 @@ export default async function DrivePage(props: {
     const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
 
     return (
-        <>
-            <SidebarProvider defaultOpen={defaultOpen}>
-                <DriveSidebar currentFolderId={parsedFolderId} storageUsed={storageUsed} storageTotal={storageTotal} />
+        <SidebarProvider defaultOpen={defaultOpen}>
+            <DriveSidebar currentFolderId={parsedFolderId} storageUsed={storageUsed} storageTotal={storageTotal} />
 
-                <div className="p-4 w-full">
+            <div className="p-4 w-full">
+                <Suspense fallback={<DriveContentSkeleton />}>
                     <DriveContent
                         files={files}
                         folders={folders}
                         parents={parents}
                         currentFolderId={parsedFolderId}
                     />
-                </div>
-            </SidebarProvider>
-        </>
+                </Suspense>
+            </div>
+        </SidebarProvider>
     );
 }
