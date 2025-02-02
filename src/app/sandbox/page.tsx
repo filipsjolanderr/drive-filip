@@ -3,6 +3,7 @@ import { mockFolders, mockFiles } from "~/lib/mockData";
 import { folders_table, files_table } from "~/server/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
+import { toast } from "sonner";
 
 export default async function Sandbox() {
     const user = await auth();

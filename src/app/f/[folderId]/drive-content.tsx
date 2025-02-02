@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/table"
 import { FileRow, FolderRow } from "~/app/f/[folderId]/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
-import { UploadButton } from "../../../components/utils/uploadthing"
+import { UploadButton, UploadDropzone } from "../../../components/utils/uploadthing"
 import { useRouter } from "next/navigation"
 import { createFolder } from "~/server/actions";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
@@ -28,6 +28,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FolderPlusIcon } from "lucide-react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -44,10 +45,15 @@ export default function DriveContent(props: {
 
   const navigate = useRouter();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createFolder(values.name, props.currentFolderId);
-    setOpen(false); // Close popover after submission
-    form.reset(); // Reset form
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = await createFolder(values.name, props.currentFolderId);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Folder created successfully");
+    }
+    setOpen(false);
+    form.reset();
   }
 
   const form = useForm<z.infer<typeof formSchema>>({

@@ -9,7 +9,7 @@ export default async function AccountStatus() {
         return redirect("/sign-in");
     }
 
-    return <div>
+    return <div className="flex items-center space-x-4">
         <SignedOut>
             <SignInButton />
         </SignedOut>

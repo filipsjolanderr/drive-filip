@@ -2,11 +2,11 @@
 
 ##TODO
 
-- [ ] fix folder deletion
-- [ ] fix folder creation
-- [ ] fix access control
+- [x] fix folder deletion
+- [x] fix folder creation
+- [x] fix access control
 - [ ] fix file view
-- [ ] fix toasts
+- [x] fix toasts
 - [ ] fix gray out
 
 ## Fun follow ups

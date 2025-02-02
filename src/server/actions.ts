@@ -6,6 +6,7 @@ import { files_table, folders_table } from "./db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { UTApi } from "uploadthing/server";
 import { cookies } from "next/headers";
+import { toast } from "sonner";
 
 const utApi = new UTApi();
 
@@ -15,32 +16,29 @@ export async function deleteFile(key: string) {
         return { error: "Unauthorized" };
     }
 
-    const [file] = await db
-        .select()
-        .from(files_table)
-        .where(
-            and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)),
-        );
+    try {
+        const [file] = await db
+            .select()
+            .from(files_table)
+            .where(
+                and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)),
+            );
 
-    if (!file) {
-        return { error: "File not found" };
+        if (!file) {
+            return { error: "File not found" };
+        }
+
+        await utApi.deleteFiles(key);
+        await db.delete(files_table)
+            .where(and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)));
+
+        const c = await cookies();
+        c.set("force-refresh", JSON.stringify(Math.random()));
+
+        return { success: true, message: "File deleted successfully" };
+    } catch (error) {
+        return { error: "Failed to delete file" };
     }
-
-    const utapiResult = await utApi.deleteFiles(key);
-
-    console.log(utapiResult);
-
-    const dbDeleteResult = await db
-        .delete(files_table)
-        .where(and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)));
-
-    console.log(dbDeleteResult);
-
-    const c = await cookies();
-
-    c.set("force-refresh", JSON.stringify(Math.random()));
-
-    return { success: true };
 }
 
 export async function createFolder(name: string, parentId: number) {
@@ -179,7 +177,7 @@ export async function deleteFolder(folderId: number) {
 
     // Delete files from database
     await db.delete(files_table).where(inArray(files_table.parent, allFolderIds));
-    
+
     const c = await cookies();
     c.set("force-refresh", JSON.stringify(Math.random()));
 

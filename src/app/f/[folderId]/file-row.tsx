@@ -1,4 +1,3 @@
-import type { Folder, File } from "~/lib/mockData"
 import { TableRow, TableCell } from "~/components/ui/table"
 import { Folder as FolderIcon, FileIcon, Trash2Icon, PencilIcon } from "lucide-react";
 import { files_table, folders_table } from "~/server/db/schema";
@@ -13,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -30,11 +30,26 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        renameFile(file.key, values.name);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const result = await renameFile(file.key, values.name);
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            toast("File renamed successfully");
+        }
         setOpen(false);
         form.reset({ name: values.name });
     }
+
+    const handleDelete = async () => {
+        const result = await deleteFile(file.key);
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("File deleted successfully");
+        }
+        setShowDeleteDialog(false);
+    };
 
     function formatFileSize(size: number) {
         if (size < 1024) {
@@ -132,11 +147,26 @@ export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        renameFolder(folder.id, values.name);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const result = await renameFolder(folder.id, values.name);
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Folder renamed successfully");
+        }
         setOpen(false);
         form.reset({ name: values.name });
     }
+
+    const handleDelete = async () => {
+        const result = await deleteFolder(folder.id);
+        if (result.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Folder deleted successfully");
+        }
+        setShowDeleteDialog(false);
+    };
 
     return (
         <TableRow key={folder.id}>
@@ -197,10 +227,7 @@ export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }
                             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
                                 Cancel
                             </Button>
-                            <Button variant="destructive" onClick={() => {
-                                deleteFolder(folder.id);
-                                setShowDeleteDialog(false);
-                            }}>
+                            <Button variant="destructive" onClick={handleDelete}>
                                 Delete
                             </Button>
                         </DialogFooter>

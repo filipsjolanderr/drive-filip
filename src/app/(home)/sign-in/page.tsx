@@ -6,7 +6,11 @@ import { Button } from "~/components/ui/button";
 export default function HomePage() {
     return (
         <>
-            <SignInButton forceRedirectUrl={"/drive"}/>
+            <SignInButton forceRedirectUrl={"/drive"}>
+                <Button>
+                    Sign in
+                </Button>
+            </SignInButton>
             <footer className="mt-16 text-sm text-neutral-500">
                 © {new Date().getFullYear()} Drive Filip. By Filip Sjölander. All rights reserved.
             </footer>
