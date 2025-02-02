@@ -27,10 +27,8 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <PostHogProvider>
-
               {children}
             </PostHogProvider>
-
           </ThemeProvider>
         </body>
       </html>
