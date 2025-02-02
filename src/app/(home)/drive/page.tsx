@@ -6,6 +6,7 @@ import { MUTATIONS, QUERIES } from "~/server/db/queries";
 export default async function DrivePage() {
     const session = await auth();
 
+
     if (!session.userId) {
         return redirect("/sign-in");
     }

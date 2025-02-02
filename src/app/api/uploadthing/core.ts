@@ -16,7 +16,7 @@ export const ourFileRouter = {
              * @see https://docs.uploadthing.com/file-routes#route-config
              */
             maxFileSize: "1GB",
-            maxFileCount: 9999,
+            maxFileCount: 100,
         },
     })
         .input(
@@ -52,6 +52,8 @@ export const ourFileRouter = {
                     name: file.name,
                     size: file.size,
                     url: file.url,
+                    key: file.key,
+                    extension: file.type,
                     parent: metadata.parentId,
                 },
                 userId: metadata.userId,

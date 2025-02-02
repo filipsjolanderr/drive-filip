@@ -1,6 +1,7 @@
 import { z } from "zod";
 import DriveContent from "~/app/f/[folderId]/drive-content";
 import { QUERIES } from "~/server/db/queries";
+import { Navbar } from "./navbar";
 
 export default async function DrivePage(props: {
     params: Promise<{ folderId: string }>
@@ -23,11 +24,16 @@ export default async function DrivePage(props: {
     ]);
 
     return (
-        <DriveContent
-            files={files}
-            folders={folders}
-            parents={parents}
-            currentFolderId={parsedFolderId}
-        />
+        <>
+            <div className="container mx-auto p-4">
+                <Navbar />
+                <DriveContent
+                    files={files}
+                    folders={folders}
+                    parents={parents}
+                    currentFolderId={parsedFolderId}
+                />
+            </div>
+        </>
     );
 }

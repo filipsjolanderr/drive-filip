@@ -4,7 +4,7 @@ import {
 } from '@clerk/nextjs'
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeProvider } from "~/app/_providers/theme-provider";
 import { PostHogProvider } from "./_providers/posthog-provider";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider >
       <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
         <body>
           <ThemeProvider

@@ -1,14 +1,53 @@
 import type { Folder, File } from "~/lib/mockData"
 import { TableRow, TableCell } from "~/components/ui/table"
-import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
+import { Folder as FolderIcon, FileIcon, Trash2Icon, PencilIcon } from "lucide-react";
 import { files_table, folders_table } from "~/server/db/schema";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
-import { deleteFile } from "~/server/actions";
+import { deleteFile, deleteFolder, renameFile, renameFolder } from "~/server/actions";
+import { useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+
+const formSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+});
 
 export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
-
     const { file } = props
+    const [open, setOpen] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: file.name,
+        },
+    });
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        renameFile(file.key, values.name);
+        setOpen(false);
+        form.reset({ name: values.name });
+    }
+
+    function formatFileSize(size: number) {
+        if (size < 1024) {
+            return size + " B";
+        } else if (size < 1024 * 1024) {
+            return (size / 1024).toFixed(2) + " KB";
+        } else if (size < 1024 * 1024 * 1024) {
+            return (size / 1024 / 1024).toFixed(2) + " MB";
+        } else {
+            return (size / 1024 / 1024 / 1024).toFixed(2) + " GB";
+        }
+    }
+
     return (
         <TableRow key={file.id}>
             <TableCell className="font-medium">
@@ -19,20 +58,86 @@ export function FileRow(props: { file: (typeof files_table.$inferSelect) }) {
                     </div>
                 </a>
             </TableCell>
-            <TableCell>file</TableCell>
-            <TableCell>{file.size}</TableCell>
+            <TableCell>{file.extension.charAt(0).toUpperCase() + file.extension.slice(1)}</TableCell>
+            <TableCell>{formatFileSize(file.size)}</TableCell>
+            <TableCell>{file.createdAt.toLocaleTimeString() + " " + file.createdAt.toLocaleDateString()}</TableCell>
             <TableCell className="text-right">
-                <Button variant="ghost" onClick={() => deleteFile(file.id)}>
-                    <Trash2Icon className="h-4 w-4" size={20} />
-                </Button>
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost">
+                            <PencilIcon className="h-4 w-4" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit">Rename</Button>
+                            </form>
+                        </Form>
+                    </PopoverContent>
+                </Popover>
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost">
+                            <Trash2Icon className="h-4 w-4" size={20} />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Delete file "{file.name}"</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to delete "{file.name}"? This action cannot be undone.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                                Cancel
+                            </Button>
+                            <Button variant="destructive" onClick={() => {
+                                deleteFile(file.key);
+                                setShowDeleteDialog(false);
+                            }}>
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </TableCell>
-
         </TableRow>
     )
 }
 
 export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }) {
     const { folder } = props
+    const [open, setOpen] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: folder.name,
+        },
+    });
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        renameFolder(folder.id, values.name);
+        setOpen(false);
+        form.reset({ name: values.name });
+    }
+
     return (
         <TableRow key={folder.id}>
             <TableCell className="font-medium">
@@ -44,10 +149,64 @@ export function FolderRow(props: { folder: (typeof folders_table.$inferSelect) }
                     {folder.name}
                 </Link>
             </TableCell>
+            <TableCell>Folder</TableCell>
             <TableCell />
-            <TableCell />
-            <TableCell />
-
+            <TableCell>{folder.createdAt.toLocaleTimeString() + " " + folder.createdAt.toLocaleDateString()}</TableCell>
+            <TableCell className="text-right">
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost">
+                            <PencilIcon className="h-4 w-4" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit">Rename</Button>
+                            </form>
+                        </Form>
+                    </PopoverContent>
+                </Popover>
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost">
+                            <Trash2Icon className="h-4 w-4" size={20} />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Delete folder "{folder.name}"</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to delete "{folder.name}"? This action cannot be undone and will delete all files and folders inside this folder.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                                Cancel
+                            </Button>
+                            <Button variant="destructive" onClick={() => {
+                                deleteFolder(folder.id);
+                                setShowDeleteDialog(false);
+                            }}>
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </TableCell>
         </TableRow>
     )
 }

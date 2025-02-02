@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React, { useState } from "react"
 import { Button } from "~/components/ui/button"
 import {
   Breadcrumb,
@@ -12,35 +12,26 @@ import {
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "~/components/ui/table"
-import { Upload } from "lucide-react"
-import { DarkModeToggle } from "../../../components/dark-mode-toggle"
 import { FileRow, FolderRow } from "~/app/f/[folderId]/file-row"
 import type { folders_table, files_table } from "~/server/db/schema"
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 import { UploadButton } from "../../../components/utils/uploadthing"
 import { useRouter } from "next/navigation"
+import { createFolder } from "~/server/actions";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Input } from "~/components/ui/input";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { FolderPlusIcon } from "lucide-react";
 
-// Common interface for both files and folders
-
-function getBreadcrumbs(currentFolderId: number, folders: typeof folders_table.$inferSelect[]): typeof folders_table.$inferSelect[] {
-  const crumbs: typeof folders_table.$inferSelect[] = []
-  let currentId: number | null = currentFolderId
-
-  while (currentId) {
-    const currentFolder = folders.find((folder) => folder.id === currentId)
-    if (!currentFolder) break
-
-    crumbs.unshift(currentFolder)
-    currentId = currentFolder.parent ?? null
-  }
-
-  return crumbs
-}
+const formSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+});
 
 export default function DriveContent(props: {
   folders: typeof folders_table.$inferSelect[];
@@ -49,10 +40,25 @@ export default function DriveContent(props: {
   currentFolderId: number;
 }) {
 
+  const [open, setOpen] = useState(false);
+
   const navigate = useRouter();
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    createFolder(values.name, props.currentFolderId);
+    setOpen(false); // Close popover after submission
+    form.reset(); // Reset form
+  }
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+    },
+  });
+
   return (
-    <div className="container mx-auto p-4">
+    <>
       <div className="flex justify-between items-center mb-4">
 
         <Breadcrumb>
@@ -78,13 +84,34 @@ export default function DriveContent(props: {
         </Breadcrumb>
 
         <div className="flex items-center space-x-4">
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          <DarkModeToggle />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <FolderPlusIcon className="h-4 w-4" size={20} />
+                New Folder
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="New Folder" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit">Create</Button>
+                </form>
+              </Form>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -94,6 +121,7 @@ export default function DriveContent(props: {
             <TableHead className="w-[300px]">Name</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Size</TableHead>
+            <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -117,6 +145,7 @@ export default function DriveContent(props: {
           folderId: props.currentFolderId,
         }}
       />
-    </div>
+
+    </>
   )
 }
