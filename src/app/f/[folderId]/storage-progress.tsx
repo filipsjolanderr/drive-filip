@@ -1,23 +1,23 @@
-import formatFileSize from "~/lib/format-file-size";
+"use client"
+
 import { Progress } from "~/components/ui/progress"
-import { QUERIES } from "~/server/db/queries";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
+interface StorageProgressProps {
+    storageUsed: number;
+    storageTotal: number;
+}
 
-export default async function StorageProgress() {
-    const session = await auth();
-    if (!session.userId) return redirect("/sign-in");
-    const storageUsed = await QUERIES.getStorageUsed(session.userId);
-    const storageTotal = 2147483648;
-    const storageUsedPercentage = (storageUsed / storageTotal) * 100;
+export default function StorageProgress({ storageUsed, storageTotal }: StorageProgressProps) {
+    const percentage = (storageUsed / storageTotal) * 100;
+    const usedGB = (storageUsed / 1024 / 1024 / 1024).toFixed(1);
+    const totalGB = (storageTotal / 1024 / 1024 / 1024).toFixed(1);
 
     return (
-            <div className="flex flex-col gap-1">
-                <Progress value={storageUsedPercentage} />
-                <div className="text-xs text-gray-500">
-                    {formatFileSize(storageUsed)} / {formatFileSize(storageTotal)}
-                </div>
-            </div>
-    )
+        <div className="space-y-2">
+            <Progress value={percentage} />
+            <p className="text-sm text-muted-foreground">
+                {usedGB} GB of {totalGB} GB used
+            </p>
+        </div>
+    );
 }

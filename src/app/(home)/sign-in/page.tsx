@@ -1,19 +1,25 @@
-import { SignInButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { Button } from "~/components/ui/button";
+import { Suspense } from "react";
+import SignUpForm from "@/app/(auth-api)/sign-up/sign-up-form";
+import { Metadata } from "next";
+import { Spinner } from "@/components/ui/spinner";
 
-export default function HomePage() {
+export const metadata: Metadata = {
+    title: "Sign Up",
+    description: "Create an account",
+};
+
+export default function SignUpPage() {
     return (
-        <>
-            <SignInButton forceRedirectUrl={"/drive"}>
-                <Button>
-                    Sign in
-                </Button>
-            </SignInButton>
-            <footer className="mt-16 text-sm text-neutral-500">
-                © {new Date().getFullYear()} Drive Filip. By Filip Sjölander. All rights reserved.
-            </footer>
-        </>
+        <main className="flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">Sign Up</h1>
+                <p className="text-balance text-sm text-muted-foreground">
+                    Enter your email below to login to your account
+                </p>
+            </div>
+            <Suspense fallback={<Spinner />}>
+                <SignUpForm />
+            </Suspense>
+        </main>
     );
 }

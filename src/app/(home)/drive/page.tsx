@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { MUTATIONS, QUERIES } from "~/server/db/queries";

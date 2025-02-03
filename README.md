@@ -8,6 +8,8 @@
 - [ ] fix file view
 - [x] fix toasts
 - [ ] fix gray out
+- [ ] ppr
+- [ ] change to better auth
 
 ## Fun follow ups
 

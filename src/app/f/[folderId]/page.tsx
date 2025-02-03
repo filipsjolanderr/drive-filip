@@ -8,6 +8,7 @@ import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
 import { cookies } from "next/headers"
 import { Suspense } from "react";
 import { DriveContentSkeleton } from "./drive-content-skeleton";
+import { DriveContentWrapper } from "./drive-content-wrapper";
 
 export const experimental_ppr = true
 
@@ -28,33 +29,7 @@ export default async function DrivePage(props: {
 
     if (!session.userId) return redirect("/sign-in");
 
-
-    const parsedFolderId = data.folderId;
-    const [folders, files, parents, storageUsed, storageTotal] = await Promise.all([
-        QUERIES.getFolders(parsedFolderId),
-        QUERIES.getFiles(parsedFolderId),
-        QUERIES.getAllParentsForFolder(parsedFolderId),
-        QUERIES.getStorageUsed(session.userId),
-        2147483648
-    ]);
-
-    const cookieStore = await cookies()
-    const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
-
     return (
-        <SidebarProvider defaultOpen={defaultOpen}>
-            <DriveSidebar currentFolderId={parsedFolderId} storageUsed={storageUsed} storageTotal={storageTotal} />
-
-            <div className="p-4 w-full">
-                <Suspense fallback={<DriveContentSkeleton />}>
-                    <DriveContent
-                        files={files}
-                        folders={folders}
-                        parents={parents}
-                        currentFolderId={parsedFolderId}
-                    />
-                </Suspense>
-            </div>
-        </SidebarProvider>
+        <DriveContentWrapper folderId={data.folderId} />
     );
 }

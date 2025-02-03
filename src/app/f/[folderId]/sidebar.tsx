@@ -17,7 +17,6 @@ import {
 import { UploadButton, UploadDropzone } from "~/components/utils/uploadthing";
 import { useRouter } from "next/navigation";
 import StorageProgress from "./storage-progress";
-import { SignedOut, SignInButton, UserButton, SignedIn } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
@@ -30,8 +29,8 @@ import { Suspense, useState } from "react";
 import { createFolder } from "~/server/actions";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import UserAndStorage from "./user-and-storage";
 
-export const experimental_ppr = true
 
 // Menu items.
 const items = [
@@ -67,14 +66,19 @@ const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
 });
 
-export function DriveSidebar(props: { currentFolderId: number, storageUsed: number, storageTotal: number }) {
+interface DriveSidebarProps {
+    currentFolderId: number;
+    storageUsed: number;
+    storageTotal: number;
+}
+
+export function DriveSidebar({ currentFolderId, storageUsed, storageTotal }: DriveSidebarProps) {
     const [open, setOpen] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
-
     const navigate = useRouter();
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const result = await createFolder(values.name, props.currentFolderId);
+        const result = await createFolder(values.name, currentFolderId);
         if (result.error) {
             toast.error(result.error);
         } else {
@@ -143,7 +147,7 @@ export function DriveSidebar(props: { currentFolderId: number, storageUsed: numb
                                                     toast.error(`Error uploading files: ${error.message}`);
                                                 }}
                                                 input={{
-                                                    folderId: props.currentFolderId,
+                                                    folderId: currentFolderId,
                                                 }}
                                             />
                                         </div>
@@ -187,17 +191,13 @@ export function DriveSidebar(props: { currentFolderId: number, storageUsed: numb
             <SidebarSeparator />
             <SidebarFooter>
                 <SidebarMenu>
-                    <Suspense fallback={<div className="h-4 bg-muted rounded w-full" />}>
-                        <SidebarMenuItem className="flex items-center justify-start gap-3">
-                            <UserButton />
-                            <div className="flex-grow justify-start">
-                                <StorageProgress />
-                            </div>
-                        </SidebarMenuItem>
-                    </Suspense>
+                    <SidebarMenuItem className="flex items-center justify-start gap-3">
+                        <Suspense fallback={<div className="h-4 bg-muted rounded w-full" />}>
+                            <UserAndStorage />
+                        </Suspense>
+                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
-
         </Sidebar>
     )
 }
