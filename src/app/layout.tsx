@@ -1,7 +1,4 @@
 import "~/styles/globals.css";
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { ThemeProvider } from "~/app/_providers/theme-provider";
@@ -20,7 +17,6 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider >
       <html lang="en" className={`${GeistSans.variable} antialiased`} suppressHydrationWarning>
         <body >
           <NextSSRPlugin
@@ -45,6 +41,5 @@ export default function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
   );
 }

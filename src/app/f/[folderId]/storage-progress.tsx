@@ -1,23 +1,31 @@
-"use client"
 
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "~/lib/auth";
 import { Progress } from "~/components/ui/progress"
+import formatFileSize from "~/lib/format-file-size";
+import { QUERIES } from "~/server/db/queries";
 
-interface StorageProgressProps {
-    storageUsed: number;
-    storageTotal: number;
-}
 
-export default function StorageProgress({ storageUsed, storageTotal }: StorageProgressProps) {
+export default async function StorageProgress() {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session?.user?.id) return redirect("/sign-in");
+
+    const storageUsed = await QUERIES.getStorageUsed(session.user.id);
+    const storageTotal = 2147483648;
+
     const percentage = (storageUsed / storageTotal) * 100;
-    const usedGB = (storageUsed / 1024 / 1024 / 1024).toFixed(1);
-    const totalGB = (storageTotal / 1024 / 1024 / 1024).toFixed(1);
+    const used = formatFileSize(storageUsed);
+    const total = formatFileSize(storageTotal);
 
     return (
         <div className="space-y-2">
             <Progress value={percentage} />
-            <p className="text-sm text-muted-foreground">
-                {usedGB} GB of {totalGB} GB used
-            </p>
+            <p className="text-xs text-muted-foreground">{used} of {total} used ({percentage.toFixed(2)}%)</p>
         </div>
+
     );
 }

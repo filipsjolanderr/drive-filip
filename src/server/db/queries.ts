@@ -1,21 +1,23 @@
-import "server-only";
+import "server-only"; 
 
 import { db } from "~/server/db";
 import {
     files_table,
     folders_table,
+    user_table,
 } from "~/server/db/schema";
+
 import { eq, isNull, and, sum } from "drizzle-orm";
 
-export const QUERIES = {
-    getFolders: function (folderId: number) {
+export  const QUERIES = {
+    getFolders: async function (folderId: number) {
         return db
             .select()
             .from(folders_table)
             .where(eq(folders_table.parent, folderId))
             .orderBy(folders_table.id);
     },
-    getFiles: function (folderId: number) {
+    getFiles: async function (folderId: number) {
         return db
             .select()
             .from(files_table)
@@ -66,6 +68,14 @@ export const QUERIES = {
             .from(files_table)
             .where(eq(files_table.ownerId, userId));
         return Number(storageUsed[0]?.size ?? 0);
+    },
+
+    getEmailByUserId: async function (userId: string) {
+        const email = await db
+            .select()
+            .from(user_table)
+            .where(eq(user_table.id, userId));
+        return email[0]?.email;
     },
 };
 

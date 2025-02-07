@@ -1,26 +1,31 @@
 "use client";
 
+import { usePostHog } from "posthog-js/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { usePostHog } from "posthog-js/react";
-import { useUser } from "@clerk/nextjs";
+import { authClient } from "~/lib/auth-client";
+
 
 export default function PostHogPageView(): null {
     const posthog = usePostHog();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const {
+        data: session,
+        isPending, //loading state
+        error //error object
+    } = authClient.useSession() 
 
-    const userInfo = useUser();
     useEffect(() => {
-        if (userInfo.user?.id) {
-            posthog.identify(userInfo.user.id, {
-                email: userInfo.user.emailAddresses[0]?.emailAddress,
+        if (session?.user?.id) {
+            posthog.identify(session.user.id, {
+                email: session.user.email,
             });
         } else {
             posthog.reset();
         }
-    }, [posthog, userInfo.user]);
+    }, [posthog, session]);
 
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
     // Track pageviews
     useEffect(() => {
         if (pathname && posthog) {

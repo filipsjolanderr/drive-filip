@@ -1,8 +1,10 @@
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
+import { auth } from "~/lib/auth";
 
 export default function HomePage() {
+  
   return (
     <>
       <h1 className="mb-4 bg-gradient-to-r from-neutral-200 to-neutral-400 bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
@@ -15,9 +17,11 @@ export default function HomePage() {
         action={async () => {
           "use server";
 
-          const session = await auth();
+          const session = await auth.api.getSession({
+            headers: await headers()
+          })
 
-          if (!session.userId) {
+          if (!session?.user?.id) {
             return redirect("/sign-in");
           }
 

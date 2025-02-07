@@ -25,8 +25,6 @@ export default function DriveContent(props: {
   files: typeof files_table.$inferSelect[];
   parents: typeof folders_table.$inferSelect[];
   currentFolderId: number;
-  storageUsed: number;
-  storageTotal: number;
 }) {
 
   return (
