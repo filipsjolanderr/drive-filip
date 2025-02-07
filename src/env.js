@@ -12,12 +12,17 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
 
-    SINGLESTORE_USER: z.string(),
-    SINGLESTORE_PASS: z.string(),
-    SINGLESTORE_HOST: z.string(),
-    SINGLESTORE_PORT: z.string(),
-    SINGLESTORE_DB_NAME: z.string(),
 
+    BETTER_AUTH_SECRET: z.string(),
+    BETTER_AUTH_URL: z.string(),
+
+    GITHUB_CLIENT_ID: z.string(),
+    GITHUB_CLIENT_SECRET: z.string(),
+
+    SMTP_HOST: z.string(),
+    SMTP_PORT: z.string(),
+    SMTP_USER: z.string(),
+    SMTP_PASS: z.string(),
   },
 
   /**
@@ -37,14 +42,20 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    SINGLESTORE_USER: process.env.SINGLESTORE_USER,
-    SINGLESTORE_PASS: process.env.SINGLESTORE_PASS,
-    SINGLESTORE_HOST: process.env.SINGLESTORE_HOST,
-    SINGLESTORE_PORT: process.env.SINGLESTORE_PORT,
-    SINGLESTORE_DB_NAME: process.env.SINGLESTORE_DB_NAME,
+
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
 
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

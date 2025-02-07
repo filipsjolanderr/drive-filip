@@ -12,6 +12,9 @@ const config = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    experimental: {
+        ppr: 'incremental',
+    },
 };
 
 export default config;

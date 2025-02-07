@@ -1,21 +1,23 @@
-import "server-only";
+import "server-only"; 
 
 import { db } from "~/server/db";
 import {
     files_table,
     folders_table,
+    user_table,
 } from "~/server/db/schema";
+
 import { eq, isNull, and, sum } from "drizzle-orm";
 
-export const QUERIES = {
-    getFolders: function (folderId: number) {
+export  const QUERIES = {
+    getFolders: async function (folderId: number) {
         return db
             .select()
             .from(folders_table)
             .where(eq(folders_table.parent, folderId))
             .orderBy(folders_table.id);
     },
-    getFiles: function (folderId: number) {
+    getFiles: async function (folderId: number) {
         return db
             .select()
             .from(files_table)
@@ -27,15 +29,16 @@ export const QUERIES = {
         let currentId: number | null = folderId;
         while (currentId !== null) {
             const folder = await db
-                .selectDistinct()
+                .select()
                 .from(folders_table)
-                .where(eq(folders_table.id, currentId));
+                .where(eq(folders_table.id, currentId))
+                .limit(1);
 
             if (!folder[0]) {
                 throw new Error("Parent folder not found");
             }
             parents.unshift(folder[0]);
-            currentId = folder[0]?.parent;
+            currentId = folder[0].parent;
         }
         return parents;
     },
@@ -43,7 +46,8 @@ export const QUERIES = {
         const folder = await db
             .select()
             .from(folders_table)
-            .where(eq(folders_table.id, folderId));
+            .where(eq(folders_table.id, folderId))
+            .limit(1);
         return folder[0];
     },
 
@@ -53,14 +57,25 @@ export const QUERIES = {
             .from(folders_table)
             .where(
                 and(eq(folders_table.ownerId, userId), isNull(folders_table.parent)),
-            );
+            )
+            .limit(1);
         return folder[0];
     },
 
     getStorageUsed: async function (userId: string) {
-        const storageUsed = await db.select({ size: sum(files_table.size) }).from(files_table).where( eq(files_table.ownerId, userId));
-        if (!storageUsed[0]) return 0;
-        return Number(storageUsed[0].size);
+        const storageUsed = await db
+            .select({ size: sum(files_table.size) })
+            .from(files_table)
+            .where(eq(files_table.ownerId, userId));
+        return Number(storageUsed[0]?.size ?? 0);
+    },
+
+    getEmailByUserId: async function (userId: string) {
+        const email = await db
+            .select()
+            .from(user_table)
+            .where(eq(user_table.id, userId));
+        return email[0]?.email;
     },
 };
 
@@ -76,42 +91,49 @@ export const MUTATIONS = {
         };
         userId: string;
     }) {
-        return await db.insert(files_table).values({
-            ...input.file,
-            ownerId: input.userId,
-        });
+        const result = await db
+            .insert(files_table)
+            .values({
+                ...input.file,
+                ownerId: input.userId,
+            })
+            .returning();
+        return result[0];
     },
 
     onboardUser: async function (userId: string) {
-        const rootFolder = await db
+        const [rootFolder] = await db
             .insert(folders_table)
             .values({
                 name: "Root",
                 parent: null,
                 ownerId: userId,
             })
-            .$returningId();
+            .returning();
 
-        const rootFolderId = rootFolder[0]!.id;
+        if (!rootFolder) {
+            throw new Error("Root folder not found");
+        }
 
         await db.insert(folders_table).values([
             {
                 name: "Trash",
-                parent: rootFolderId,
+                parent: rootFolder.id,
                 ownerId: userId,
+
             },
             {
                 name: "Shared",
-                parent: rootFolderId,
+                parent: rootFolder.id,
                 ownerId: userId,
             },
             {
                 name: "Documents",
-                parent: rootFolderId,
+                parent: rootFolder.id,
                 ownerId: userId,
             },
         ]);
 
-        return rootFolderId;
+        return rootFolder.id;
     },
 };

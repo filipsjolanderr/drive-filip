@@ -1,18 +1,31 @@
-import formatFileSize from "~/lib/format-file-size";
+
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "~/lib/auth";
 import { Progress } from "~/components/ui/progress"
+import formatFileSize from "~/lib/format-file-size";
+import { QUERIES } from "~/server/db/queries";
 
 
-export default function StorageProgress(props: { storageUsed: number, storageTotal: number }) {
-    const storageUsed = props.storageUsed;
-    const storageTotal = props.storageTotal;
-    const storageUsedPercentage = (storageUsed / storageTotal) * 100;
+export default async function StorageProgress() {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session?.user?.id) return redirect("/sign-in");
+
+    const storageUsed = await QUERIES.getStorageUsed(session.user.id);
+    const storageTotal = 2147483648;
+
+    const percentage = (storageUsed / storageTotal) * 100;
+    const used = formatFileSize(storageUsed);
+    const total = formatFileSize(storageTotal);
 
     return (
-            <div className="flex flex-col gap-1">
-                <Progress value={storageUsedPercentage} />
-                <div className="text-xs text-gray-500">
-                    {formatFileSize(storageUsed)} / {formatFileSize(storageTotal)}
-                </div>
-            </div>
-    )
+        <div className="space-y-2">
+            <Progress value={percentage} />
+            <p className="text-xs text-muted-foreground">{used} of {total} used ({percentage.toFixed(2)}%)</p>
+        </div>
+
+    );
 }

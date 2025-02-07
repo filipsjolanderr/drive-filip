@@ -3,16 +3,23 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "./db";
 import { files_table, folders_table } from "./db/schema";
-import { auth } from "@clerk/nextjs/server";
 import { UTApi } from "uploadthing/server";
-import { cookies } from "next/headers";
-import { toast } from "sonner";
+import { cookies, headers } from "next/headers";
+import { auth } from "~/lib/auth";
+
 
 const utApi = new UTApi();
 
 export async function deleteFile(key: string) {
-    const session = await auth();
-    if (!session.userId) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!session) {
+        return { error: "Unauthorized" };
+    }
+
+
+    if (!session.user?.id) {
         return { error: "Unauthorized" };
     }
 
@@ -21,7 +28,7 @@ export async function deleteFile(key: string) {
             .select()
             .from(files_table)
             .where(
-                and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)),
+                and(eq(files_table.key, key), eq(files_table.ownerId, session.user.id)),
             );
 
         if (!file) {
@@ -30,7 +37,7 @@ export async function deleteFile(key: string) {
 
         await utApi.deleteFiles(key);
         await db.delete(files_table)
-            .where(and(eq(files_table.key, key), eq(files_table.ownerId, session.userId)));
+            .where(and(eq(files_table.key, key), eq(files_table.ownerId, session.user.id)));
 
         const c = await cookies();
         c.set("force-refresh", JSON.stringify(Math.random()));
@@ -42,15 +49,18 @@ export async function deleteFile(key: string) {
 }
 
 export async function createFolder(name: string, parentId: number) {
-    const session = await auth();
-    if (!session.userId) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!session || !session.user?.id) {
         return { error: "Unauthorized" };
     }
+
 
     const newFolder = await db.insert(folders_table).values({
         name,
         parent: parentId,
-        ownerId: session.userId,
+        ownerId: session.user.id,
     });
 
     console.log(newFolder);
@@ -63,12 +73,16 @@ export async function createFolder(name: string, parentId: number) {
 }
 
 export async function renameFolder(folderId: number, newName: string) {
-    const session = await auth();
-    if (!session.userId) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!session || !session.user?.id) {
         return { error: "Unauthorized" };
     }
 
-    const [folder] = await db.select().from(folders_table).where(and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.userId)));
+
+    const [folder] = await db.select().from(folders_table)
+        .where(and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.user.id)));
 
     if (!folder) {
         return { error: "Folder not found" };
@@ -76,7 +90,7 @@ export async function renameFolder(folderId: number, newName: string) {
 
     const dbUpdateResult = await db.update(folders_table).set({
         name: newName,
-    }).where(and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.userId)));
+    }).where(and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.user.id)));
 
     console.log(dbUpdateResult);
 
@@ -88,10 +102,13 @@ export async function renameFolder(folderId: number, newName: string) {
 }
 
 export async function renameFile(key: string, newName: string) {
-    const session = await auth();
-    if (!session.userId) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!session || !session.user?.id) {
         return { error: "Unauthorized" };
     }
+
 
     const [file] = await db.select().from(files_table).where(eq(files_table.key, key));
 
@@ -114,21 +131,23 @@ export async function renameFile(key: string, newName: string) {
 
     c.set("force-refresh", JSON.stringify(Math.random()));
 
-
     console.log(dbUpdateResult);
 
     return { success: true };
 }
 
 export async function deleteFolder(folderId: number) {
-    const session = await auth();
-    if (!session.userId) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!session || !session.user?.id) {
         return { error: "Unauthorized" };
     }
 
+
     // Verify user owns the folder
     const [folder] = await db.select().from(folders_table).where(
-        and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.userId))
+        and(eq(folders_table.id, folderId), eq(folders_table.ownerId, session.user.id))
     );
 
     if (!folder) {
@@ -140,12 +159,12 @@ export async function deleteFolder(folderId: number) {
         WITH RECURSIVE subfolders AS (
             SELECT id 
             FROM ${folders_table} 
-            WHERE id = ${folderId} AND owner_id = ${session.userId}
+            WHERE id = ${folderId} AND owner_id = ${session.user.id}
             UNION ALL
             SELECT f.id 
             FROM ${folders_table} f
             INNER JOIN subfolders s ON f.parent = s.id
-            WHERE f.owner_id = ${session.userId}
+            WHERE f.owner_id = ${session.user.id}
         )
         SELECT id FROM subfolders
     `);
