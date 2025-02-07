@@ -21,8 +21,8 @@ importers:
         specifier: ^0.14.0
         version: 0.14.0
       '@netlify/plugin-nextjs':
-        specifier: 5.0.0-rc.8
-        version: 5.0.0-rc.8
+        specifier: 5.9.4
+        version: 5.9.4
       '@radix-ui/react-alert-dialog':
         specifier: ^1.1.6
         version: 1.1.6(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -760,8 +760,8 @@ packages:
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
 
-  '@netlify/plugin-nextjs@5.0.0-rc.8':
-    resolution: {integrity: sha512-8hCQrsGcS38+IMW0m+Nz5R5yYYwTnzXoUDATOjXPXNZacspl2WUNYuJ5pwV7le0z4kdhrLu3AAp16hXPlvJqGw==}
+  '@netlify/plugin-nextjs@5.9.4':
+    resolution: {integrity: sha512-Q9qyhGUxFuM3kuWmoaj4yHPUfHhOsZmwdsQv4kIXkBWVu8FOe0RFHRP0A0EXciSVFGwq+XAo3H5jEtVSANAOWw==}
     engines: {node: '>=18.0.0'}
 
   '@next/env@15.2.0-canary.33':
@@ -3779,7 +3779,7 @@ snapshots:
 
   '@neon-rs/load@0.0.4': {}
 
-  '@netlify/plugin-nextjs@5.0.0-rc.8': {}
+  '@netlify/plugin-nextjs@5.9.4': {}
 
   '@next/env@15.2.0-canary.33': {}
 
