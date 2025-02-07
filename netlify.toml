@@ -1,9 +1,3 @@
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[build.environment]
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
-  
 [[redirects]]
   from = "/ingest/static/*"
   to = "https://eu-assets.i.posthog.com/static/:splat"
