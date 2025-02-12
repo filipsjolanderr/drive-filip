@@ -4,21 +4,28 @@ import { QUERIES } from "~/server/db/queries";
 import { auth } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers"
+import { Suspense } from "react";
 
-export function generateStaticParams() {
-    return [{ folderId: '1' }]
-}
-
-export default async function DrivePage(props: {
+export default function DrivePage(props: {
     params: Promise<{ folderId: string }>
 }) {
-    const params = await props.params;
+    return (
+        <Suspense>
+            <SuspendedDrivePage params={props.params} />
+        </Suspense>
+    );
+}
+
+async function SuspendedDrivePage({ params }: {
+    params: Promise<{ folderId: string }>
+}) {
+    const params_data = await params;
 
     const { data, success } = z
         .object({
             folderId: z.coerce.number(),
         })
-        .safeParse(params);
+        .safeParse(params_data);
 
     if (!success) return <div>Invalid folder ID</div>;
 
