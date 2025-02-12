@@ -5,12 +5,13 @@ import { auth } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers"
 import { Suspense } from "react";
+import { DriveContentSkeleton } from "~/components/ui/drive-content-skeleton";
 
 export default function DrivePage(props: {
     params: Promise<{ folderId: string }>
 }) {
     return (
-        <Suspense>
+        <Suspense fallback={<DriveContentSkeleton />}>
             <SuspendedDrivePage params={props.params} />
         </Suspense>
     );

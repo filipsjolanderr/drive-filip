@@ -18,9 +18,7 @@ export default function DriveLayout({ children }: { children: React.ReactNode })
                 }
             />
             <div className="p-4 w-full">
-                <Suspense fallback={<DriveContentSkeleton />}>
-                    {children}
-                </Suspense>
+                {children}
             </div>
         </SidebarProvider>
     )
