@@ -38,13 +38,11 @@ export default async function DrivePage(props: {
     ]);
 
     return (
-        <Suspense key={data.folderId} fallback={<div>Loading...</div>}>
-            <DriveContent
-                files={files}
-                folders={folders}
-                parents={parents}
-                currentFolderId={data.folderId}
-            />
-        </Suspense>
+        <DriveContent
+            files={files}
+            folders={folders}
+            parents={parents}
+            currentFolderId={data.folderId}
+        />
     );
 }

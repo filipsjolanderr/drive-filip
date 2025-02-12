@@ -11,6 +11,3 @@
   host = "eu.i.posthog.com"
   status = 200
   force = true
-  
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
