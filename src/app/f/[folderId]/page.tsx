@@ -5,11 +5,8 @@ import { auth } from "~/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers"
 
-export async function generateStaticParams() {
-    const folders = await QUERIES.getFolders(1)
-    return folders.map((folder) => ({
-        folderId: folder.id.toString(),
-    }))
+export function generateStaticParams() {
+    return [{ folderId: '1' }]
 }
 
 export default async function DrivePage(props: {
