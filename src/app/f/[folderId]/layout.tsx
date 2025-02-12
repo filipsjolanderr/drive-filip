@@ -5,6 +5,7 @@ import StorageProgress from "./storage-progress"
 import { DriveContentSkeleton } from "~/components/ui/drive-content-skeleton"
 import { ProgressSkeleton } from "~/components/ui/progress-skeleton"
 
+export const experimental_ppr = true
 
 export default function DriveLayout({ children }: { children: React.ReactNode }) {
     return (

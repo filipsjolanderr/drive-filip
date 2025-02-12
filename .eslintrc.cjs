@@ -5,7 +5,9 @@ const config = {
     "project": true
   },
   "plugins": [
+    // @ts-ignore
     "@typescript-eslint",
+    // @ts-ignore
     "drizzle"
   ],
   "extends": [
