@@ -36,7 +36,7 @@ export const auth = betterAuth({
 
         }
     }),
-
+    trustedOrigins: ["https://drive.sjolander.dev"], // the base url of your auth server
     emailVerification: {
         sendOnSignUp: true,
         async sendVerificationEmail({ user, url }) {
